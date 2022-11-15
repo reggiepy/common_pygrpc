@@ -142,3 +142,7 @@ cython_debug/
 .idea/
 !wheels/
 !lib/
+
+common_pygrpc/build/
+common_pygrpc/common_grpc.egg-info/
+common_pygrpc/dist/

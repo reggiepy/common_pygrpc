@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package common;
+
+service CommonService {
+    // 基础Demo
+    rpc handle (CommonRequest) returns (CommonResponse) {}
+}
+
+// 简单请求
+message CommonRequest {
+    bytes request = 1;
+    uint32 serialize = 2;
+}
+
+// 简单响应
+message CommonResponse {
+    string response = 1;
+}
