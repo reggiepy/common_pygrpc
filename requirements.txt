@@ -1,0 +1,5 @@
+grpcio==1.50.0
+grpcio-tools==1.50.0
+protobuf==4.21.9
+six==1.16.0
+wincertstore==0.2
