@@ -1,7 +1,9 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
+import functools
 import importlib
+import inspect
 import json
 import logging
 import sys
@@ -47,10 +49,11 @@ class CommonService(common_pb2_grpc.CommonServiceServicer):
         request_str = request.request.decode(encoding='utf-8')
         grpc_request = json.loads(request_str)
         response = {'status': 0}
+        func_type = grpc_request.get('func_type')
         clazz = grpc_request.get('clazz')
         clazz = self.clazz_handler(clazz)
         module = importlib.import_module(clazz)
-        invoke = getattr(module, grpc_request.get('method'))
+        invoke = functools.reduce(lambda x, y: getattr(x, y), [module, *grpc_request.get('method').split('.')])
         args = grpc_request.get('args') or ()
         kwargs = grpc_request.get('kwargs') or {}
         try:
@@ -132,11 +135,18 @@ def grpc_service(server, serialize=3):
     """
 
     def decorator(func):
-        def wrapper(*args):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            sig = inspect.signature(func)
+            bind = sig.bind(*args, **kwargs).arguments
+            if sig.parameters.get("cls"):
+                cls = bind.get("cls")
+                bind.pop("cls")
             request = {
                 'clazz': func.__module__,
-                'method': func.__name__,
-                'args': list(args)
+                'method': func.__qualname__,
+                'args': (),
+                'kwargs': dict(bind.items()),
             }
             request_json = json.dumps(request, ensure_ascii=False)
             response = grpc_client.connect(server).handle(
