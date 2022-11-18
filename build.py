@@ -261,6 +261,19 @@ if __name__ == '__main__':
                 # change version
                 Version.change_setup_version(setup_file, next_version)
 
+        cmd = f"{Path(sys.executable).as_posix()}" \
+              f" -m grpc_tools.protoc " \
+              f"-Iproto " \
+              f"--python_out=common_pygrpc " \
+              f"--grpc_python_out=common_pygrpc  " \
+              f"proto/common.proto"
+        out, err, rc = run_command(cmd, env={k: v for k, v in os.environ.items()})
+        if rc != 0:
+            color_module.print_red_text(f"build proto error: {decode_bytes(err)}")
+            Version.change_setup_version(setup_file)
+        else:
+            color_module.print_green_text(f"build proto success: {decode_bytes(out)}")
+
         os.chdir(Path(BASE_DIR).joinpath(model_name))
         cmd = f"{Path(sys.executable).as_posix()} setup.py bdist_wheel"
         out, err, rc = run_command(cmd, env={k: v for k, v in os.environ.items()})

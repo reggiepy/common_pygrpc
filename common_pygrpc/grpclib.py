@@ -18,13 +18,14 @@ import grpc
 from google.protobuf import json_format
 
 logger = logging.getLogger(__name__)
+rpc_logger = logging.getLogger("rpc_log")
 
 
 def rpc_log(func):
     @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         start_time = time.time()
-        response = await func(*args, **kwargs)
+        response = func(*args, **kwargs)
         process_time = time.time() - start_time
         func_name = "{}.{}".format(func.__module__, func.__name__)
         sig = inspect.signature(func)
@@ -32,7 +33,7 @@ def rpc_log(func):
         request = bind.get("request")
         json_data = json_format.MessageToJson(response, preserving_proto_field_name=True)
         if len(json_data) > 1024 * 4:
-            logger.debug("{}".format({
+            rpc_logger.debug("{}".format({
                 "type": "rpc_log",
                 "request_id": request.request_id,
                 "function": func_name,
@@ -40,7 +41,7 @@ def rpc_log(func):
                 "response": json_data[:1024 * 4] + "...",
             }))
         else:
-            logger.debug("{}".format({
+            rpc_logger.debug("{}".format({
                 "type": "rpc_log",
                 "request_id": request.request_id,
                 "function": func_name,
@@ -70,7 +71,7 @@ class CommonService(common_pb2_grpc.CommonServiceServicer):
 
     @rpc_log
     def handle(self, request, context):
-        request_str = request.request.decode(encoding='utf-8')
+        request_str = request.request
         grpc_request = json.loads(request_str)
         response = {'status': 0}
         clazz = grpc_request.get('clazz')

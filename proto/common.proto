@@ -10,7 +10,7 @@ service CommonService {
 // 简单请求
 message CommonRequest {
   string request_id = 1;
-  bytes request = 2;
+  string request = 2;
   uint32 serialize = 3;
 }
 
