@@ -9,25 +9,48 @@ import logging
 import sys
 import time
 import traceback
+import uuid
 from concurrent import futures
 
 import common_pb2
 import common_pb2_grpc
 import grpc
+from google.protobuf import json_format
+
+logger = logging.getLogger(__name__)
 
 
-class Logger:
+def rpc_log(func):
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        start_time = time.time()
+        response = await func(*args, **kwargs)
+        process_time = time.time() - start_time
+        func_name = "{}.{}".format(func.__module__, func.__name__)
+        sig = inspect.signature(func)
+        bind = sig.bind(*args, **kwargs).arguments
+        request = bind.get("request")
+        json_data = json_format.MessageToJson(response, preserving_proto_field_name=True)
+        if len(json_data) > 1024 * 4:
+            logger.debug("{}".format({
+                "type": "rpc_log",
+                "request_id": request.request_id,
+                "function": func_name,
+                "process_time": "{:.6f}s".format(process_time),
+                "response": json_data[:1024 * 4] + "...",
+            }))
+        else:
+            logger.debug("{}".format({
+                "type": "rpc_log",
+                "request_id": request.request_id,
+                "function": func_name,
+                "status": response.status,
+                "process_time": "{:.6f}s".format(process_time),
+                "response": json.loads(json_data),
+            }))
+        return response
 
-    def __init__(self):
-        logger = logging.getLogger('console')
-        logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.INFO)
-        log_format = '%(asctime)s  %(levelname)s %(process)d --- [%(threadName)+15s] %(module)-20s : %(message)s'
-        formatter = logging.Formatter(log_format, datefmt='%Y-%m-%d %H:%M:%S.000')
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        self.logger = logger
+    return wrapper
 
 
 class Server:
@@ -45,15 +68,16 @@ class CommonService(common_pb2_grpc.CommonServiceServicer):
     def clazz_handler(cls, clazz):
         return clazz
 
+    @rpc_log
     def handle(self, request, context):
         request_str = request.request.decode(encoding='utf-8')
         grpc_request = json.loads(request_str)
         response = {'status': 0}
-        func_type = grpc_request.get('func_type')
         clazz = grpc_request.get('clazz')
-        clazz = self.clazz_handler(clazz)
-        module = importlib.import_module(clazz)
-        invoke = functools.reduce(lambda x, y: getattr(x, y), [module, *grpc_request.get('method').split('.')])
+        _clazz = self.clazz_handler(clazz)
+        module = importlib.import_module(_clazz)
+        method = grpc_request.get('method')
+        invoke = functools.reduce(lambda x, y: getattr(x, y), [module, *method.split('.')])
         args = grpc_request.get('args') or ()
         kwargs = grpc_request.get('kwargs') or {}
         try:
@@ -65,7 +89,10 @@ class CommonService(common_pb2_grpc.CommonServiceServicer):
             response['message'] = e.args
             response['excType'] = exc_type.__name__
 
-        return common_pb2.CommonResponse(response=json.dumps(response).encode(encoding="utf-8"))
+        return common_pb2.CommonResponse(
+            response=json.dumps(response, ensure_ascii=False),
+            status=response["status"]
+        )
 
 
 class GrpcClient:
@@ -111,7 +138,7 @@ class GrpcServer:
         common_pb2_grpc.add_CommonServiceServicer_to_server(self.service, server)
         server.add_insecure_port(self.address)
         server.start()
-        log.info('grpc server running, listen on ' + self.address)
+        logger.info('grpc server running, listen on ' + self.address)
         try:
             while True:
                 time.sleep(60 * 60 * 24)
@@ -150,7 +177,12 @@ def grpc_service(server, serialize=3):
             }
             request_json = json.dumps(request, ensure_ascii=False)
             response = grpc_client.connect(server).handle(
-                common_pb2.CommonRequest(request=bytes(request_json.encode('utf-8')), serialize=serialize))
+                common_pb2.CommonRequest(
+                    request=request_json,
+                    serialize=serialize,
+                    request_id=uuid.uuid4().hex
+                )
+            )
             response_json = json.loads(response.response)
             if response_json.get('status') == 0:
                 return response_json.get('result')
@@ -164,5 +196,4 @@ def grpc_service(server, serialize=3):
     return decorator
 
 
-log = Logger().logger
 grpc_client = GrpcClient()

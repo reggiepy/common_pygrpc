@@ -3,17 +3,19 @@ syntax = "proto3";
 package common;
 
 service CommonService {
-    // 基础Demo
-    rpc handle (CommonRequest) returns (CommonResponse) {}
+  // 基础Demo
+  rpc handle (CommonRequest) returns (CommonResponse) {}
 }
 
 // 简单请求
 message CommonRequest {
-    bytes request = 1;
-    uint32 serialize = 2;
+  string request_id = 1;
+  bytes request = 2;
+  uint32 serialize = 3;
 }
 
 // 简单响应
 message CommonResponse {
-    string response = 1;
+  int32 status = 1;
+  string response = 2;
 }
