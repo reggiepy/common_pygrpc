@@ -71,9 +71,13 @@ class CommonService(common_pb2_grpc.CommonServiceServicer):
 
     @rpc_log
     def handle(self, request, context):
-        request_str = request.request
+        request_str = request.request.decode('utf-8')
         grpc_request = json.loads(request_str)
-        response = {'status': 0}
+        response = {
+            'status': 0,
+            'message': "",
+            'excType': "",
+        }
         clazz = grpc_request.get('clazz')
         _clazz = self.clazz_handler(clazz)
         module = importlib.import_module(_clazz)
@@ -91,7 +95,7 @@ class CommonService(common_pb2_grpc.CommonServiceServicer):
             response['excType'] = exc_type.__name__
 
         return common_pb2.CommonResponse(
-            response=json.dumps(response, ensure_ascii=False),
+            response=json.dumps(response, ensure_ascii=False).encode("utf-8"),
             status=response["status"]
         )
 
@@ -179,7 +183,7 @@ def grpc_service(server, serialize=3):
             request_json = json.dumps(request, ensure_ascii=False)
             response = grpc_client.connect(server).handle(
                 common_pb2.CommonRequest(
-                    request=request_json,
+                    request=request_json.encode('utf-8'),
                     serialize=serialize,
                     request_id=uuid.uuid4().hex
                 )
