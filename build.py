@@ -260,7 +260,7 @@ if __name__ == '__main__':
         if args.version != "=":
             if args.version == "+":
                 next_version = Version.next_version(setup_file)
-            if args.version == "-":
+            elif args.version == "-":
                 next_version = Version.prev_version(setup_file)
             else:
                 next_version = args.version

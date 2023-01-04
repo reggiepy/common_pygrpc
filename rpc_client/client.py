@@ -6,8 +6,8 @@ grpc_client.load(servers)
 response = say(1, 'hello grpc!')
 print(response)
 
-# response = error()
-# print(response)
+response = error()
+print(response)
 
 response = User.create("wt")
 print(response)

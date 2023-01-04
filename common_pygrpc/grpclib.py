@@ -92,7 +92,7 @@ class CommonService(common_pb2_grpc.CommonServiceServicer):
             exc_type, exc_value, exc_tb = sys.exc_info()
             traceback.print_exception(exc_type, exc_value, exc_tb)
             response['status'] = -1
-            response['message'] = e.args
+            response['message'] = str(e)
             response['excType'] = exc_type.__name__
 
         return common_pb2.CommonResponse(
