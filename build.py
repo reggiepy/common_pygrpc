@@ -208,6 +208,13 @@ class Version:
         return ".".join(map(lambda x: str(x), next_version))
 
     @classmethod
+    def prev_version(cls, setup_file):
+        current_version = cls.current_version(setup_file)
+        next_version = list(map(lambda x: int(x), current_version.split('.')))
+        next_version[-1] -= 1
+        return ".".join(map(lambda x: str(x), next_version))
+
+    @classmethod
     def change_setup_version(cls, setup_file, version=None):
         current_version = cls.current_version(setup_file)
         next_version = version or cls.next_version(setup_file)
@@ -253,6 +260,8 @@ if __name__ == '__main__':
         if args.version != "=":
             if args.version == "+":
                 next_version = Version.next_version(setup_file)
+            if args.version == "-":
+                next_version = Version.prev_version(setup_file)
             else:
                 next_version = args.version
             # match version number
