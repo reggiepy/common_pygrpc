@@ -293,7 +293,7 @@ if __name__ == '__main__':
             color_module.print_green_text(f"build success: {decode_bytes(out)}")
 
         os.chdir(BASE_DIR)
-        if args.clean:
+        if args.clean and rc == 0:
             color_module.print_blue_text(f"clean....")
             shutil.rmtree(model_path.joinpath("build"))
             shutil.rmtree(model_path.joinpath(f"{model_name}.egg-info"))

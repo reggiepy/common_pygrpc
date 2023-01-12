@@ -3,7 +3,7 @@
 # @Time : 2022/11/15 15:57
 
 from os import path
-
+from Cython.Build import cythonize
 from setuptools import setup
 
 this_directory = path.abspath(path.dirname(__file__))
@@ -28,4 +28,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    # ext_modules=cythonize("grpclib.py", compiler_directives={'language_level': 3}),
 )

@@ -77,7 +77,11 @@ class CommonService(common_pb2_grpc.CommonServiceServicer):
             'status': 0,
             'message': "",
             'excType': "",
-            'result': "",
+            'result': {
+                "status": "",
+                "msg": "",
+                "data": "",
+            },
         }
         clazz = grpc_request.get('clazz')
         _clazz = self.clazz_handler(clazz)
