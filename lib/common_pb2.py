@@ -17,9 +17,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='common.proto',
   package='common',
   syntax='proto3',
-  serialized_options=None,
+  serialized_options=b'Z\010./common',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0c\x63ommon.proto\x12\x06\x63ommon\"3\n\rCommonRequest\x12\x0f\n\x07request\x18\x01 \x01(\x0c\x12\x11\n\tserialize\x18\x02 \x01(\r\"\"\n\x0e\x43ommonResponse\x12\x10\n\x08response\x18\x01 \x01(\t2J\n\rCommonService\x12\x39\n\x06handle\x12\x15.common.CommonRequest\x1a\x16.common.CommonResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x0c\x63ommon.proto\x12\x06\x63ommon\"G\n\rCommonRequest\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0f\n\x07request\x18\x02 \x01(\x0c\x12\x11\n\tserialize\x18\x03 \x01(\r\"2\n\x0e\x43ommonResponse\x12\x0e\n\x06status\x18\x01 \x01(\x05\x12\x10\n\x08response\x18\x02 \x01(\x0c\x32J\n\rCommonService\x12\x39\n\x06handle\x12\x15.common.CommonRequest\x1a\x16.common.CommonResponse\"\x00\x42\nZ\x08./commonb\x06proto3'
 )
 
 
@@ -34,15 +34,22 @@ _COMMONREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='request', full_name='common.CommonRequest.request', index=0,
-      number=1, type=12, cpp_type=9, label=1,
+      name='request_id', full_name='common.CommonRequest.request_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='request', full_name='common.CommonRequest.request', index=1,
+      number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='serialize', full_name='common.CommonRequest.serialize', index=1,
-      number=2, type=13, cpp_type=3, label=1,
+      name='serialize', full_name='common.CommonRequest.serialize', index=2,
+      number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -60,7 +67,7 @@ _COMMONREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=24,
-  serialized_end=75,
+  serialized_end=95,
 )
 
 
@@ -73,9 +80,16 @@ _COMMONRESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='response', full_name='common.CommonResponse.response', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='status', full_name='common.CommonResponse.status', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='response', full_name='common.CommonResponse.response', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -91,8 +105,8 @@ _COMMONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=77,
-  serialized_end=111,
+  serialized_start=97,
+  serialized_end=147,
 )
 
 DESCRIPTOR.message_types_by_name['CommonRequest'] = _COMMONREQUEST
@@ -114,6 +128,7 @@ CommonResponse = _reflection.GeneratedProtocolMessageType('CommonResponse', (_me
 _sym_db.RegisterMessage(CommonResponse)
 
 
+DESCRIPTOR._options = None
 
 _COMMONSERVICE = _descriptor.ServiceDescriptor(
   name='CommonService',
@@ -122,8 +137,8 @@ _COMMONSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=113,
-  serialized_end=187,
+  serialized_start=149,
+  serialized_end=223,
   methods=[
   _descriptor.MethodDescriptor(
     name='handle',

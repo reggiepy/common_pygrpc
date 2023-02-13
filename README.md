@@ -19,6 +19,9 @@ cd common-pygrpc
 python client.py
 # run in server server
 python server.py
+
+# 生成python rpc
+python -m grpc_tools.protoc -I proto --python_out=lib --grpc_python_out=lib common.proto
 ```
 
 ## Architecture

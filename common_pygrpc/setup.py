@@ -20,7 +20,7 @@ setup(
     author_email='reggiepy@foxmail.com',
     url='https://github.com/reggiepy/grpcTest',
     py_modules=['grpclib', 'common_pb2', 'common_pb2_grpc'],
-    install_requires=['grpcio>=1.50.0', 'protobuf>=3.20.3'],
+    install_requires=['grpcio==1.50.0', 'protobuf==3.20.3'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     classifiers=[
