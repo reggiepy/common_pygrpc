@@ -20,8 +20,12 @@ python client.py
 # run in server server
 python server.py
 
-# 生成python rpc
+# 生成 python rpc
 python -m grpc_tools.protoc -I proto --python_out=lib --grpc_python_out=lib common.proto
+# 生成 js rpc
+protoc  -I proto common.proto --js_out=import_style=commonjs:lib --grpc-web_out=import_style=commonjs,mode=grpcwebtext:lib
+# 生成 golang rpc
+protoc  -I proto common.proto --go_out=plugins=grpc:lib
 ```
 
 ## Architecture
