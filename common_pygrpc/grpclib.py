@@ -179,31 +179,87 @@ def grpc_service(server, serialize=3):
             if sig.parameters.get("cls"):
                 cls = bind.get("cls")
                 bind.pop("cls")
-            request = {
-                'clazz': func.__module__,
-                'method': func.__qualname__,
-                'args': (),
-                'kwargs': dict(bind.items()),
-            }
-            request_json = json.dumps(request, ensure_ascii=False)
-            response = grpc_client.connect(server).handle(
-                common_pb2.CommonRequest(
-                    request=request_json.encode('utf-8'),
-                    serialize=serialize,
-                    request_id=uuid.uuid4().hex
-                )
+            rpc_client = grpc_client.connect(server)
+            response_json = GrpcHelper.call_rpc(
+                rpc_client,
+                clazz=func.__module__,
+                method=func.__qualname__,
+                args=(),
+                kwargs={k: v for k, v in bind.items()},
             )
-            response_json = json.loads(response.response)
-            if response_json.get('status') == 0:
-                return response_json.get('result')
-            elif response_json.get('status') == -1:
-                raise GrpcException(response_json.get('excType'), response_json.get('message'))
-            else:
-                raise Exception('unknown grpc exception')
+
+            return response_json
 
         return wrapper
 
     return decorator
+
+
+class GrpcHelper:
+    @classmethod
+    def call_rpc(
+            cls,
+            rpc_client,
+            clazz,
+            method,
+            args=None,
+            kwargs=None,
+            request_id=None,
+            serialize=3
+    ):
+        """
+        common call rpc
+        Args:
+            rpc_client:
+            clazz:
+            method:
+            args:
+            kwargs:
+            request_id:
+            serialize:
+
+        Returns:
+
+        """
+        request_id = request_id if request_id is not None else uuid.uuid4().hex
+        args = args if args is not None else ()
+        kwargs = kwargs if kwargs is not None else {}
+        request = {
+            'clazz': clazz,
+            'method': method,
+            'args': args,
+            'kwargs': dict(kwargs),
+        }
+        request_json = json.dumps(request, ensure_ascii=False)
+        resp = rpc_client.handle(
+            common_pb2.CommonRequest(
+                request=request_json.encode('utf-8'),
+                serialize=serialize,
+                request_id=request_id
+            )
+        )
+
+        return resp
+
+    @classmethod
+    def call_rpc_result(cls, rpc_client, clazz, method, args=None, kwargs=None, request_id=None):
+        resp = cls.call_rpc(
+            rpc_client,
+            clazz=clazz,
+            method=method,
+            args=args,
+            kwargs=kwargs,
+            request_id=request_id,
+        )
+        status = resp.status
+        response = resp.response.decode("utf-8")
+        response_json = json.loads(response)
+        if response_json.get('status') == 0:
+            return response_json.get('result')
+        elif status == -1 or response_json.get('status') == -1:
+            raise GrpcException(response_json.get('excType'), response_json.get('message'))
+        else:
+            raise Exception('unknown grpc exception')
 
 
 grpc_client = GrpcClient()
