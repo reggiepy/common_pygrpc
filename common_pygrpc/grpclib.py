@@ -138,22 +138,29 @@ class GrpcServer:
         self.address = host + ':' + str(port)
         self.max_workers = max_workers
         self.service = CommonService()
+        self.rpc_server: grpc.server = None
 
     def set_clazz_handler(self, func):
         if callable(func):
             self.service.clazz_handler = func
 
     def run(self):
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=self.max_workers))
-        common_pb2_grpc.add_CommonServiceServicer_to_server(self.service, server)
-        server.add_insecure_port(self.address)
-        server.start()
+        self.run_blocking()
+
+    def run_background(self):
+        self.rpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=self.max_workers))
+        common_pb2_grpc.add_CommonServiceServicer_to_server(self.service, self.rpc_server)
+        self.rpc_server.add_insecure_port(self.address)
+        self.rpc_server.start()
         logger.info('grpc server running, listen on ' + self.address)
+
+    def run_blocking(self):
+        self.run_background()
         try:
             while True:
                 time.sleep(60 * 60 * 24)
         except KeyboardInterrupt:
-            server.stop(0)
+            self.rpc_server.stop(0)
 
 
 class GrpcException(Exception):
@@ -180,7 +187,7 @@ def grpc_service(server, serialize=3):
                 cls = bind.get("cls")
                 bind.pop("cls")
             rpc_client = grpc_client.connect(server)
-            response_json = GrpcHelper.call_rpc(
+            response_json = GrpcHelper.call_rpc_result(
                 rpc_client,
                 clazz=func.__module__,
                 method=func.__qualname__,

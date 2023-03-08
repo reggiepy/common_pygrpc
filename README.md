@@ -28,4 +28,10 @@ protoc  -I proto common.proto --js_out=import_style=commonjs:lib --grpc-web_out=
 protoc  -I proto common.proto --go_out=plugins=grpc:lib
 ```
 
+## Install
+
+```bash
+pip install common_pygrpc-0.0.1-py3-none-any.whl --force
+```
+
 ## Architecture
