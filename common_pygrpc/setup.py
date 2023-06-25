@@ -18,7 +18,7 @@ setup(
     description='common python grpc service',
     author='reggiepy',
     author_email='reggiepy@foxmail.com',
-    url='https://github.com/reggiepy/grpcTest',
+    url='https://github.com/reggiepy/common_pygrpc',
     py_modules=['grpclib', 'common_pb2', 'common_pb2_grpc'],
     install_requires=['grpcio==1.50.0', 'protobuf==3.20.3'],
     long_description=long_description,
