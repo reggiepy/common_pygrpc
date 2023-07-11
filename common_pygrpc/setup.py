@@ -14,7 +14,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 # python setup.py bdist_wheel  打包成wheel格式
 setup(
     name='common_pygrpc',
-    version='0.0.1',
+    version='0.0.3',
     description='common python grpc service',
     author='reggiepy',
     author_email='reggiepy@foxmail.com',
