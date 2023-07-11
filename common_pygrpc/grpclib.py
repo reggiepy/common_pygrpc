@@ -125,9 +125,7 @@ class GrpcClient:
         :return:
         """
         for server in servers:
-            channel = grpc.insecure_channel(server.addr)
-            stub = common_pb2_grpc.CommonServiceStub(channel)
-            self.stubs[server.server] = stub
+            self.stubs[server.server] = server.addr
 
     def __init__(self):
         self.stubs = {}
@@ -186,16 +184,16 @@ def grpc_service(server, serialize=3):
             if sig.parameters.get("cls"):
                 cls = bind.get("cls")
                 bind.pop("cls")
-            rpc_client = grpc_client.connect(server)
-            response_json = GrpcHelper.call_rpc_result(
-                rpc_client,
-                clazz=func.__module__,
-                method=func.__qualname__,
-                args=(),
-                kwargs={k: v for k, v in bind.items()},
-            )
-
-            return response_json
+            rpc_client_addr = grpc_client.connect(server)
+            with grpc.insecure_channel(rpc_client_addr) as channel:
+                response_json = GrpcHelper.call_rpc_result(
+                    rpc_client=common_pb2_grpc.CommonServiceStub(channel),
+                    clazz=func.__module__,
+                    method=func.__qualname__,
+                    args=(),
+                    kwargs={k: v for k, v in bind.items()},
+                )
+                return response_json
 
         return wrapper
 
