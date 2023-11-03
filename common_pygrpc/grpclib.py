@@ -61,6 +61,23 @@ class Server:
         self.host = host
         self.port = port
         self.addr = host + ':' + str(port)
+        self._channel = None
+
+    def copy(self):
+        return type(self)(self.server, self.host, self.port)
+
+    @property
+    def channel(self):
+        if self._channel is None:
+            self._channel = grpc.insecure_channel(self.addr)
+        return self._channel
+
+    def __enter__(self):
+        stub = common_pb2_grpc.CommonServiceStub(self.channel)
+        return stub
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.channel.close()
 
 
 class CommonService(common_pb2_grpc.CommonServiceServicer):
@@ -118,6 +135,9 @@ class GrpcClient:
         """
         return self.stubs.get(server)
 
+    def get_server(self, server):
+        return self.server_address.get(server)
+
     def load(self, servers):
         """
         load grpc server list
@@ -125,10 +145,14 @@ class GrpcClient:
         :return:
         """
         for server in servers:
-            self.stubs[server.server] = server.addr
+            channel = grpc.insecure_channel(server.addr)
+            stub = common_pb2_grpc.CommonServiceStub(channel)
+            self.stubs[server.server] = stub
+            self.server_address[server.server] = server
 
     def __init__(self):
         self.stubs = {}
+        self.server_address = {}
 
 
 class GrpcServer:
@@ -184,16 +208,15 @@ def grpc_service(server, serialize=3):
             if sig.parameters.get("cls"):
                 cls = bind.get("cls")
                 bind.pop("cls")
-            rpc_client_addr = grpc_client.connect(server)
-            with grpc.insecure_channel(rpc_client_addr) as channel:
-                response_json = GrpcHelper.call_rpc_result(
-                    rpc_client=common_pb2_grpc.CommonServiceStub(channel),
-                    clazz=func.__module__,
-                    method=func.__qualname__,
-                    args=(),
-                    kwargs={k: v for k, v in bind.items()},
-                )
-                return response_json
+            rpc_client = grpc_client.connect(server)
+            response_json = GrpcHelper.call_rpc_result(
+                rpc_client,
+                clazz=func.__module__,
+                method=func.__qualname__,
+                args=(),
+                kwargs={k: v for k, v in bind.items()},
+            )
+            return response_json
 
         return wrapper
 
