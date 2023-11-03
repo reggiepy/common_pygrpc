@@ -1,4 +1,4 @@
-# python3 
+# 通用 grpc 服务
 
 [![python version](https://img.shields.io/badge/python-3.7-success.svg?style=flat)](https://github.com/reggiepy/common-pygrpc)
 [![release](https://img.shields.io/github/v/tag/reggiepy/common-pygrpc?color=success&label=release)](https://github.com/reggiepy/common-pygrpc)
