@@ -29,6 +29,9 @@ python -m grpc_tools.protoc -I proto --python_out=lib --grpc_python_out=lib comm
 protoc  -I proto common.proto --js_out=import_style=commonjs:lib --grpc-web_out=import_style=commonjs,mode=grpcwebtext:lib
 # 生成 golang rpc
 protoc  -I proto common.proto --go_out=plugins=grpc:lib
+
+# 发布到pypi
+twine upload dist\common_pygrpc-0.0.5* --verbose
 ```
 
 ## Install
