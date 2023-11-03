@@ -156,11 +156,20 @@ class GrpcClient:
 
 
 class GrpcServer:
-    def __init__(self, host='0.0.0.0', port=6565, max_workers=10):
+    def __init__(self, host='0.0.0.0', port=6565, max_workers=10, max_message_length=256 * 1024 * 1024):
+        """
+        grpc server
+        Args:
+            host: address
+            port: Port number
+            max_workers: Number of worker threads
+            max_message_length: Can be set according to specific needs, set to 256 M here
+        """
         self.address = host + ':' + str(port)
         self.max_workers = max_workers
         self.service = CommonService()
         self.rpc_server: grpc.server = None
+        self.max_message_length = max_message_length
 
     def set_clazz_handler(self, func):
         if callable(func):
@@ -170,7 +179,13 @@ class GrpcServer:
         self.run_blocking()
 
     def run_background(self):
-        self.rpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=self.max_workers))
+        self.rpc_server = grpc.server(
+            futures.ThreadPoolExecutor(max_workers=self.max_workers),
+            options=[
+                ('grpc.max_send_message_length', self.max_message_length),
+                ('grpc.max_receive_message_length', self.max_message_length),
+            ]
+        )
         common_pb2_grpc.add_CommonServiceServicer_to_server(self.service, self.rpc_server)
         self.rpc_server.add_insecure_port(self.address)
         self.rpc_server.start()
