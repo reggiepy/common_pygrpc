@@ -15,6 +15,9 @@ cd common-pygrpc
 ## Usage
 
 ```bash
+# 打包成 wheel
+python setup.py bdist_wheel
+
 # run in client server
 python client.py
 # run in server server

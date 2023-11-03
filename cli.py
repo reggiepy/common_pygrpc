@@ -4,6 +4,7 @@
 import argparse
 import configparser
 import ctypes
+import glob
 import os
 import re
 import shlex
@@ -225,7 +226,7 @@ class Version:
 
 
 if __name__ == '__main__':
-    BASE_DIR = os.getcwd()
+    BASE_DIR = Path(os.getcwd())
     model_name = "common_pygrpc"
     model_path = Path(BASE_DIR).joinpath(model_name)
     setup_file = model_path.joinpath("setup.py")
@@ -247,6 +248,7 @@ if __name__ == '__main__':
         help="start build"
     )
     args = parser.parse_args()
+    print(args)
     if args.test is False:
         # handle color module
         if args.color_module not in globals():
@@ -266,7 +268,7 @@ if __name__ == '__main__':
                 next_version = args.version
             # match version number
             if Version.VERSION_NB_COMPILE.match(next_version):
-                color_module.print_green_text(f"new version: {Version.current_version(setup_file)}")
+                color_module.print_green_text(f"{Version.current_version(setup_file)} --> {next_version}")
                 # change version
                 Version.change_setup_version(setup_file, next_version)
 
@@ -283,7 +285,7 @@ if __name__ == '__main__':
         else:
             color_module.print_green_text(f"build proto success: {decode_bytes(out)}")
 
-        os.chdir(Path(BASE_DIR).joinpath(model_name))
+        os.chdir(model_path)
         cmd = f"{Path(sys.executable).as_posix()} setup.py bdist_wheel"
         out, err, rc = run_command(cmd, env={k: v for k, v in os.environ.items()})
         if rc != 0:
@@ -292,16 +294,25 @@ if __name__ == '__main__':
         else:
             color_module.print_green_text(f"build success: {decode_bytes(out)}")
 
-        os.chdir(BASE_DIR)
+        os.chdir(model_path)
         if args.clean and rc == 0:
             color_module.print_blue_text(f"clean....")
-            shutil.rmtree(model_path.joinpath("build"))
-            shutil.rmtree(model_path.joinpath(f"{model_name}.egg-info"))
+            f = model_path.joinpath("build")
+            color_module.print_red_text(f'rm {f}')
+            shutil.rmtree(f)
+            f = model_path.joinpath(f"{model_name}.egg-info")
+            color_module.print_red_text(f'rm {f}')
+            shutil.rmtree(f)
             for file in os.listdir(model_path.joinpath("dist"))[:1]:
+                src = model_path.joinpath("dist").joinpath(file)
+                dest = Path(BASE_DIR).joinpath(file)
+                color_module.print_blue_text(f"move {src} --> {dest}")
                 shutil.move(
-                    model_path.joinpath("dist").joinpath(file),
-                    Path(BASE_DIR).joinpath(file)
+                    src,
+                    dest
                 )
             shutil.rmtree(model_path.joinpath("dist"))
+            for f in glob.glob("*.c"):
+                color_module.print_red_text(f"rm {f}")
+                model_path.joinpath(f).unlink()
             color_module.print_green_text(f"clean success")
-    print(args)
