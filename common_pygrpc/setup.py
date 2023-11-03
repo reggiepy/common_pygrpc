@@ -16,13 +16,14 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='common_pygrpc',
-    version='0.0.5',
+    version='0.0.10',
     description='common python grpc service',
     author='reggiepy',
     author_email='reggiepy@foxmail.com',
     url='https://github.com/reggiepy/common_pygrpc',
     license="LICENSE",
     py_modules=['grpclib', 'common_pb2', 'common_pb2_grpc'],
+    # packages=find_packages(),
     install_requires=['grpcio==1.50.0', 'protobuf==3.20.3'],
     python_requires='>=3.6',
     long_description=long_description,
