@@ -251,20 +251,22 @@ class Cli:
                     # change version
                     Version.change_setup_version(setup_file, next_version)
 
-            cmd = f"{Path(sys.executable).as_posix()}" \
-                  f" -m grpc_tools.protoc " \
-                  f"-Iproto " \
-                  f"--python_out=common_pygrpc " \
-                  f"--grpc_python_out=common_pygrpc  " \
-                  f"proto/common.proto"
-            out, err, rc = run_command(cmd, env={k: v for k, v in os.environ.items()})
-            if rc != 0:
-                color_module.print_red_text(f"build proto error: {decode_bytes(err)}")
-                Version.change_setup_version(setup_file)
-            else:
-                color_module.print_green_text(f"build proto success: {decode_bytes(out)}")
+            if parse.regenerate_grpc:
+                # 生成 grpc 包
+                cmd = f"{Path(sys.executable).as_posix()}" \
+                      f" -m grpc_tools.protoc " \
+                      f"-Iproto " \
+                      f"--python_out=src/common_pygrpc " \
+                      f"--grpc_python_out=src/common_pygrpc  " \
+                      f"proto/common.proto"
+                out, err, rc = run_command(cmd, env={k: v for k, v in os.environ.items()})
+                if rc != 0:
+                    color_module.print_red_text(f"build proto error: {decode_bytes(err)}")
+                    Version.change_setup_version(setup_file)
+                else:
+                    color_module.print_green_text(f"build proto success: {decode_bytes(out)}")
 
-            os.chdir(model_path)
+            # 打包whl
             cmd = f"{Path(sys.executable).as_posix()} setup.py bdist_wheel"
             out, err, rc = run_command(cmd, env={k: v for k, v in os.environ.items()})
             if rc != 0:
@@ -273,35 +275,29 @@ class Cli:
             else:
                 color_module.print_green_text(f"build success: {decode_bytes(out)}")
 
-            os.chdir(model_path)
+            # 清理残留
             if parse.clean and rc == 0:
                 color_module.print_blue_text(f"clean....")
-                f = model_path.joinpath("build")
+                f = BASE_DIR.joinpath("build")
                 color_module.print_red_text(f'rm {f}')
                 shutil.rmtree(f)
-                f = model_path.joinpath(f"{model_name}.egg-info")
-                color_module.print_red_text(f'rm {f}')
-                shutil.rmtree(f)
-                for file in os.listdir(model_path.joinpath("dist"))[:1]:
-                    src = model_path.joinpath("dist").joinpath(file)
-                    dest = Path(BASE_DIR).joinpath(file)
-                    color_module.print_blue_text(f"move {src} --> {dest}")
-                    shutil.move(
-                        src,
-                        dest
-                    )
-                shutil.rmtree(model_path.joinpath("dist"))
-                for f in glob.glob("*.c"):
+                # 删除元数据
+                for f in glob.glob(BASE_DIR.joinpath(r'**/common_pygrpc.egg-info').as_posix(), recursive=True):
+                    color_module.print_red_text(f'rm {f}')
+                    shutil.rmtree(f)
+
+                # 删除 C 临时文件
+                for f in glob.glob("**/*.c", recursive=True):
                     color_module.print_red_text(f"rm {f}")
-                    model_path.joinpath(f).unlink()
+                    Path(f).unlink()
                 color_module.print_green_text(f"clean success")
 
 
 if __name__ == '__main__':
     BASE_DIR = Path(os.getcwd())
     model_name = "common_pygrpc"
-    model_path = Path(BASE_DIR).joinpath(model_name)
-    setup_file = model_path.joinpath("setup.py")
+    model_path = Path(BASE_DIR).joinpath("src").joinpath(model_name)
+    setup_file = BASE_DIR.joinpath("setup.py")
     parser = argparse.ArgumentParser(description="whl build script")
     parser.set_defaults(func=lambda _: parser.print_help())
 
@@ -317,11 +313,15 @@ if __name__ == '__main__':
         help="test parameters not generate whl"
     )
     setup_parser.add_argument(
+        "-rg", "--regenerate-grpc", type=bool, default=True,
+        help="test parameters not generate whl"
+    )
+    setup_parser.add_argument(
         "-c", "--clean", type=bool, default=True,
         help="clean build directory"
     )
     setup_parser.add_argument(
-        "--color_module", type=str, default="Color",
+        "--color-module", type=str, default="Color",
         help="start build"
     )
     setup_parser.set_defaults(func=Cli.setup, parser=subparsers)

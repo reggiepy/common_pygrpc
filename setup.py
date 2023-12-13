@@ -16,14 +16,19 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='common_pygrpc',
-    version='0.0.5',
+    version='0.0.7',
     description='common python grpc service',
     author='reggiepy',
     author_email='reggiepy@foxmail.com',
     url='https://github.com/reggiepy/common_pygrpc',
     license="LICENSE",
-    # py_modules=['grpclib', 'common_pb2', 'common_pb2_grpc'],
-    # packages=find_packages(),
+    package_dir={'': 'src/common_pygrpc'},
+    # 包含pyi文件
+    package_data={'': ['*.pyi']},
+    # --------------------------------------- 使用源码 -----------------------------------------
+    py_modules=['grpclib', 'common_pb2', 'common_pb2_grpc'],
+    packages=find_packages(where=""),
+    # -----------------------------------------------------------------------------------------
     install_requires=['grpcio==1.50.0', 'protobuf==3.20.3'],
     python_requires='>=3.6',
     long_description=long_description,
@@ -33,5 +38,10 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    ext_modules=cythonize(['grpclib.py', 'common_pb2.py', 'common_pb2_grpc.py'], compiler_directives={'language_level': 3}),
+    # --------------------------------------- 使用C 编译 -----------------------------------------
+    # ext_modules=cythonize(
+    #     ['src/common_pygrpc/grpclib.py', 'src/common_pygrpc/common_pb2.py', 'src/common_pygrpc/common_pb2_grpc.py'],
+    #     compiler_directives={'language_level': 3}
+    # ),
+    # -----------------------------------------------------------------------------------------
 )
