@@ -38,6 +38,8 @@ twine upload dist\common_pygrpc-0.0.5* --verbose
 
 ```bash
 pip install common_pygrpc-0.0.1-py3-none-any.whl --force
+# or
+pip install common_pygrpc
 ```
 
 ## Architecture
