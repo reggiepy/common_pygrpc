@@ -38,16 +38,16 @@ class MyPluginCommand(bdist_wheel):
 
 setup(
     name="common_pygrpc",
-    version="1.0.0",
+    version="1.0.1",
     description="common python grpc service",
     author="reggiepy",
     author_email="reggiepy@foxmail.com",
     url="https://github.com/reggiepy/common_pygrpc",
     license="LICENSE",
     # --------------------------------------- <<< 使用C 编译 -----------------------------------------
-    # cmdclass={
-    #     'bdist_wheel': MyPluginCommand,
-    # },
+    cmdclass={
+        'bdist_wheel': MyPluginCommand,
+    },
     # --------------------------------------- 使用C 编译 >>> -----------------------------------------
     package_dir={"": "src"},
     # --------------------------------------- <<< 使用源码 -----------------------------------------
