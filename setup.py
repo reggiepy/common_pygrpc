@@ -50,10 +50,10 @@ setup(
     # --------------------------------------- 使用C 编译 >>> -----------------------------------------
     package_dir={"": "src"},
     # --------------------------------------- <<< 使用源码 -----------------------------------------
-    # # 包含pyi文件
-    package_data={"": ["src/*/*pyi"]},
-    py_modules=['common_pygrpc'],
-    packages=find_packages(where="src"),
+    # # # 包含pyi文件
+    # package_data={"": ["src/*/*pyi"]},
+    # py_modules=['common_pygrpc'],
+    # packages=find_packages(where="src"),
     # --------------------------------------- 使用源码 >>> -----------------------------------------
     install_requires=["grpcio==1.50.0", "protobuf==3.20.3"],
     python_requires=">=3.6",
@@ -65,13 +65,13 @@ setup(
         "Operating System :: OS Independent",
     ],
     # --------------------------------------- <<< 使用C 编译 -----------------------------------------
-    # ext_modules=cythonize(
-    #     [
-    #         "src/common_pygrpc/grpclib.py",
-    #         "src/common_pygrpc/common_pb2.py",
-    #         "src/common_pygrpc/common_pb2_grpc.py",
-    #     ],
-    #     compiler_directives={"language_level": 3},
-    # ),
+    ext_modules=cythonize(
+        [
+            "src/common_pygrpc/grpclib.py",
+            "src/common_pygrpc/common_pb2.py",
+            "src/common_pygrpc/common_pb2_grpc.py",
+        ],
+        compiler_directives={"language_level": 3},
+    ),
     # --------------------------------------- 使用C 编译 >>> -----------------------------------------
 )
