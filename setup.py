@@ -28,6 +28,7 @@ class MyPluginCommand(bdist_wheel):
         for file in glob.glob("src/*/*pyi"):
             f = Path(file)
             d = Path(self.bdist_dir).joinpath(self.distribution.get_name()).joinpath(f"{f.name}")
+            print(f"copying {f} >>>>>>> {d}")
             d.write_text(f.read_text(encoding="utf-8"), encoding="utf-8")
         return result
 
