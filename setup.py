@@ -38,7 +38,7 @@ class MyPluginCommand(bdist_wheel):
 
 setup(
     name="common_pygrpc",
-    version="0.0.6",
+    version="1.0.0",
     description="common python grpc service",
     author="reggiepy",
     author_email="reggiepy@foxmail.com",
