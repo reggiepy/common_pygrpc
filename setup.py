@@ -10,8 +10,8 @@ from Cython.Build import cythonize
 from setuptools import setup, find_packages
 from wheel.bdist_wheel import bdist_wheel
 
-this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
+base = Path(__file__).parent
+with open(base.joinpath("src/common_pygrpc/README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 
