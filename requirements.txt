@@ -1,5 +1,14 @@
+certifi==2022.12.7
+charset-normalizer==2.1.1
+common-pygrpc==0.0.5
+cPython==0.0.6
+dnspython==2.2.1
 grpcio==1.50.0
 grpcio-tools==1.38.0
+idna==3.4
 protobuf==3.20.3
+pymongo==4.3.3
+requests==2.28.1
 six==1.16.0
+urllib3==1.26.14
 wincertstore==0.2
